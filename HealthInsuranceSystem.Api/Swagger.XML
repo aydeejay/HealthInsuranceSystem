@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HealthInsuranceSystem.Api</name>
+    </assembly>
+    <members>
+        <member name="M:HealthInsuranceSystem.Api.Configurations.DefaultData.Initialize(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            <c>Initialize</c> Offers extension for default data initialization
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Configurations.DefaultData.SaveRoleWithClaims(System.Int32[],System.Int32,Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Update roleClaim table with matching claim for default roles
+            </summary>
+            <param name="arrayClaimId"></param>
+            <param name="roleId"></param>
+            <param name="app"></param>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Configurations.DefaultData.LoadDefaultRoles">
+            <summary>
+            Populates the Role table with default data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Configurations.DefaultData.LoadDefaultClaims">
+            <summary>
+            Populates the Claim table with default data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Configurations.DefaultData.LoadDefaultAdminUser(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Populates the user and party table with default data
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Controllers.BaseApiController.Ok">
+             <summary>
+            
+             </summary>
+             <returns></returns>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Controllers.BaseApiController.Ok``1(``0)">
+            <summary>
+            Response for okay with result type T
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Controllers.BaseApiController.BussinessError``1(``0)">
+            <summary>
+            Response for Conflict with result type T at all bussiness errors
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Controllers.BaseApiController.Error(System.String)">
+            <summary>
+            Envelop for error messages
+            </summary>
+            <param name="errorMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HealthInsuranceSystem.Api.Controllers.BaseApiController.ErrorList(System.Collections.Generic.List{System.String})">
+            <summary>
+            Envelop for error messages
+            </summary>
+            <param name="errorMessages"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
