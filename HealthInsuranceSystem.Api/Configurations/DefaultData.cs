@@ -20,13 +20,13 @@ namespace HealthInsuranceSystem.Api.Configurations
                 context.Database.EnsureCreated();
 
                 // Populate Claims table if it is null or empty
-                if (context.Claim == null || !context.Claim.Any())
+                if (context.AuthClaims == null || !context.AuthClaims.Any())
                 {
                     var claimModel = LoadDefaultClaims().ToArray();
 
-                    var set = context.Set<Claim>().AsNoTracking().ToList();
-                    context.Claim.AddRange(set);
-                    context.Claim.AddRange(claimModel);
+                    var set = context.Set<AuthClaim>().AsNoTracking().ToList();
+                    context.AuthClaims.AddRange(set);
+                    context.AuthClaims.AddRange(claimModel);
                     context.SaveChanges();
                 }
 
@@ -138,10 +138,10 @@ namespace HealthInsuranceSystem.Api.Configurations
         /// <returns></returns>
         public static List<Claim> LoadDefaultClaims()
         {
-            List<Claim> claims = new List<Claim>() {
-                new Claim
+            List<AuthClaim> authClaims = new List<AuthClaim>() {
+                new AuthClaim
                 {
-                    Name = claim.AcceptRequest,
+                    Name = authClaims.AcceptRequest,
                     Description = "Accept Request",
                     CreatedDate = DateTime.Now,
                     ModifiedDate = DateTime.Now,
