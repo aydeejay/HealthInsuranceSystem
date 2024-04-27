@@ -2,10 +2,12 @@
 
 using FluentValidation;
 
+using HealthInsuranceSystem.Core.Data.PageQuery;
 using HealthInsuranceSystem.Core.Extensions;
 using HealthInsuranceSystem.Core.Models.DTO.UserDto;
 using HealthInsuranceSystem.Core.Services.IService;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthInsuranceSystem.Api.Controllers
@@ -23,10 +25,12 @@ namespace HealthInsuranceSystem.Api.Controllers
             _userService = userService;
             _addUserDtoMappingConfig = addUserDtoMappingConfig;
         }
+        [AllowAnonymous]
         [HttpGet("getAllUser")]
-        public async Task<IActionResult> GetAllUser()
+        //[Produces(typeof(Envelope<PagedQueryResult<GetUserDto>>))]
+        public async Task<IActionResult> GetAllUser([FromQuery] PaginatedQuery query)
         {
-            var response = await _userService.GetAllUser();
+            var response = await _userService.GetAllUser(query);
             Result res = Result.Combine(response);
             if (res.IsFailure)
                 return Error(res.Error);

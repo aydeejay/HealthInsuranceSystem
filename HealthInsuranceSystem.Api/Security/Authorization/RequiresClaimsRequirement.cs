@@ -1,4 +1,5 @@
 ﻿
+using HealthInsuranceSystem.Core.Exceptions;
 using HealthInsuranceSystem.Core.Security;
 
 using Microsoft.AspNetCore.Authorization;

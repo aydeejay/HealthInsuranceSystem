@@ -1,13 +1,18 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 using CSharpFunctionalExtensions;
 
+using HealthInsuranceSystem.Core.Data;
+using HealthInsuranceSystem.Core.Data.PageQuery;
 using HealthInsuranceSystem.Core.Data.Repository.IRepository;
 using HealthInsuranceSystem.Core.Extensions;
 using HealthInsuranceSystem.Core.Extensions.Constants;
 using HealthInsuranceSystem.Core.Models.Domain;
 using HealthInsuranceSystem.Core.Models.DTO.ClaimsDto;
 using HealthInsuranceSystem.Core.Services.IService;
+
+using Microsoft.EntityFrameworkCore;
 
 
 namespace HealthInsuranceSystem.Core.Services
@@ -16,12 +21,56 @@ namespace HealthInsuranceSystem.Core.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly DataContext _context;
+        private readonly IConfigurationProvider _configurationProvider;
 
-        public ClaimService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ClaimService(IUnitOfWork unitOfWork, IMapper mapper, DataContext context, IConfigurationProvider configurationProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _context = context;
+            _configurationProvider = configurationProvider;
         }
+        public async Task<Result<ResponseModel<PagedQueryResult<GetClaimDto>>>> GetAllClaims(PaginatedQuery query)
+        {
+            var result = new ResponseModel<PagedQueryResult<GetClaimDto>>();
+
+            var claims = _context.Set<Claim>()
+                .AsNoTracking()
+                .Include(x => x.AssignedUser)
+                .Include(x => x.PolicyHolder)
+                .AsQueryable();
+
+            var search = query.Search?.ToLower();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                claims = claims.Where(x =>
+                    x.ClaimId.Equals(search) ||
+                    x.CreatedDate.Equals(search) ||
+                    x.ExpenseAmount.Equals(search) ||
+                    x.PolicyHolderId.Equals(search));
+            }
+
+            if (query.PolicyHolderId != null && query.PolicyHolderId != 0)
+            {
+                claims = claims.Where(x => x.PolicyHolderId == query.PolicyHolderId);
+            }
+
+            result.Data.Items = await claims
+            .ProjectTo<GetClaimDto>(_mapper.ConfigurationProvider)
+                .Skip((query.PageQuery.PageNumber - 1) * query.PageQuery.PageSize)
+                .Take(query.PageQuery.PageSize)
+                .ToListAsync();
+
+            result.Data.TotalItemCount = await claims.CountAsync();
+            result.Data.PageCount = (result.Data.TotalItemCount + query.PageQuery.PageSize - 1) / query.PageQuery.PageSize;
+            result.Data.PageNumber = query.PageQuery.PageNumber;
+            result.Data.PageSize = query.PageQuery.PageSize;
+
+            return result;
+        }
+
         public async Task<Result<ResponseModel>> AddClaim(AddClaimDto request)
         {
             var response = new ResponseModel();

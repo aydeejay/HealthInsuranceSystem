@@ -7,7 +7,7 @@ namespace HealthInsuranceSystem.Core.Models.DTO.UserDto
 {
     public class AddUserDto
     {
-        public string NationalIDNumber { get; set; }
+        public string NationalID { get; set; }
 
         public string FirstName { get; set; }
 
@@ -24,7 +24,7 @@ namespace HealthInsuranceSystem.Core.Models.DTO.UserDto
         {
             RuleFor(x => x.FirstName).NotEmpty().WithMessage("{PropertyName} is required");
             RuleFor(x => x.LastName).NotEmpty().WithMessage("{PropertyName} is required");
-            RuleFor(x => x.NationalIDNumber).NotEmpty().WithMessage("{PropertyName} is required");
+            RuleFor(x => x.NationalID).NotEmpty().WithMessage("{PropertyName} is required");
             RuleFor(x => x.Password).NotEmpty().WithMessage("{PropertyName} is required");
             RuleFor(x => x.DateOfBirth).NotEmpty().WithMessage("{PropertyName} is required");
             RuleFor(x => x.RoleType).NotEmpty().WithMessage("{PropertyName} is required");

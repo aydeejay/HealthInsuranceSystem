@@ -3,6 +3,7 @@
 using HealthInsuranceSystem.Core.Models.Domain;
 using HealthInsuranceSystem.Core.Models.DTO.ClaimsDto;
 using HealthInsuranceSystem.Core.Models.DTO.UserDto;
+using HealthInsuranceSystem.Core.Security;
 
 namespace HealthInsuranceSystem.Core.Models.Mappings
 {
@@ -10,10 +11,12 @@ namespace HealthInsuranceSystem.Core.Models.Mappings
     {
         public MappingConfig()
         {
-            CreateMap<AddClaimsDto, Claim>().ReverseMap();
+            CreateMap<AddClaimDto, Claim>().ReverseMap();
             CreateMap<AddUserDto, User>().ReverseMap();
             CreateMap<UpdateClaimDto, Claim>().ReverseMap();
             CreateMap<GetUserDto, User>().ReverseMap();
+
+            CreateMap<User, IdentityUser>();
         }
     }
 }

@@ -13,8 +13,7 @@ namespace HealthInsuranceSystem.Api.Configurations
     {
         public static void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpContextAccessor();
-            services.AddHttpContextAccessor();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
             services.AddScoped(typeof(GenericRepository<>), typeof(GenericRepository<>));

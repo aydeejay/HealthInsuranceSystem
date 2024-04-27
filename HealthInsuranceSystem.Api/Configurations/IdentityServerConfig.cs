@@ -1,13 +1,13 @@
 ﻿using IdentityServer4.Models;
-using Microsoft.Extensions.DependencyInjection;
+
 using System.Security.Cryptography.X509Certificates;
 
 namespace HealthInsuranceSystem.Api.Configurations
-{    
+{
     public static class IdentityServerConfig
     {
         public const string RoleIdentityResource = "role";
-        public const string ApiResourceName = "HealthInsuranceAPI";
+        public const string ApiResourceName = "ERPAPI";
 
         public static void ConfigureServices(IServiceCollection services, IConfiguration config)
         {

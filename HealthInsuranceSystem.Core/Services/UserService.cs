@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 using CSharpFunctionalExtensions;
 
 using HealthInsuranceSystem.Core.Data;
+using HealthInsuranceSystem.Core.Data.PageQuery;
 using HealthInsuranceSystem.Core.Data.Repository.IRepository;
 using HealthInsuranceSystem.Core.Extensions;
 using HealthInsuranceSystem.Core.Extensions.Constants;
@@ -25,21 +27,54 @@ namespace HealthInsuranceSystem.Core.Services
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly IPasswordService _passwordService;
+        private readonly IConfigurationProvider _configurationProvider;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, DataContext context, IPasswordService passwordService)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, DataContext context, IPasswordService passwordService, IConfigurationProvider configurationProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _context = context;
             _passwordService = passwordService;
+            _configurationProvider = configurationProvider;
         }
-        public async Task<Result<ResponseModel<List<GetUserDto>>>> GetAllUser()
+        public async Task<Result<PagedQueryResult<GetUserDto>>> GetAllUser(PaginatedQuery query)
         {
-            var response = new ResponseModel<List<GetUserDto>>();
-            var users = await _unitOfWork.UserRepository.GetAll();
-            var result = _mapper.Map<List<GetUserDto>>(users);
-            response.Data = result;
-            return response;
+            var result = new PagedQueryResult<GetUserDto>();
+
+            var user = await _unitOfWork.UserRepository.GetAll();
+            var users = _context.Set<User>()
+            .AsNoTracking()
+            .Include(x => x.Role)
+            .AsQueryable();
+
+            var search = query.Search?.ToLower();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                users = users.Where(x =>
+                    x.FirstName.Contains(search) ||
+                    x.LastName.Contains(search) ||
+                    x.NationalID.Contains(search) ||
+                    x.UserPolicyNumber.Contains(search));
+            }
+
+            if (query.PolicyHolderId != null && query.PolicyHolderId != 0)
+            {
+                users = users.Where(x => x.Id == query.PolicyHolderId);
+            }
+
+            result.Items = await users
+           .ProjectTo<GetUserDto>(_configurationProvider)
+           .Skip((query.PageQuery.PageNumber - 1) * query.PageQuery.PageSize)
+           .Take(query.PageQuery.PageSize)
+           .ToListAsync();
+
+            result.TotalItemCount = await users.CountAsync();
+            result.PageCount = (result.TotalItemCount + query.PageQuery.PageSize - 1) / query.PageQuery.PageSize;
+            result.PageNumber = query.PageQuery.PageNumber;
+            result.PageSize = query.PageQuery.PageSize;
+
+            return result;
         }
 
         public async Task<Result<ResponseModel<GetUserDto>>> GetUserByPolicyNumber(string policyNumber)
@@ -71,8 +106,25 @@ namespace HealthInsuranceSystem.Core.Services
 
         public async Task<Result<ResponseModel>> CreateUser(AddUserDto request)
         {
+            //Check if user is an Admin and the kind of rolerequested for user
+            if (request.RoleType != RoleType.PolicyHolder)
+            {
+                return Result.Failure<ResponseModel>(UserConstants.ErrorMessages.InvalidUserRole);
+            }
+
             var response = new ResponseModel();
-            var user = _mapper.Map<User>(request);
+
+            var user = await _context.Set<User>()
+               .AsNoTracking()
+               .Where(x => x.NationalID.ToLower() == request.NationalID.ToLower())
+               .FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                return Result.Failure<ResponseModel>(UserConstants.ErrorMessages.UserExists);
+            }
+
+            user = _mapper.Map<User>(request);
             var role = await _context.Set<Role>()
                .AsNoTracking()
                .Where(x => x.Name == request.RoleType.ToString())
@@ -83,6 +135,7 @@ namespace HealthInsuranceSystem.Core.Services
 
             user.UserPolicyNumber = GeneratePolicyHolderId();
 
+            user.IsActive = true;
             user.CreatedDate = DateTime.Now;
             user.LastModifiedDate = DateTime.Now;
             user.Salt = _passwordService.CreateSalt();

@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 using CSharpFunctionalExtensions;
 
 using HealthInsuranceSystem.Core.Data;
+using HealthInsuranceSystem.Core.Extensions;
 using HealthInsuranceSystem.Core.Extensions.Constants;
 using HealthInsuranceSystem.Core.Models.Domain;
 
@@ -13,11 +13,7 @@ namespace HealthInsuranceSystem.Core.Security
 {
     public interface ILoginService
     {
-        Task<LoginDto> GetLoginByEmail(string email);
-
-        Task<bool> LoginByEmailCheck(string email);
-
-        Task<Result<LoginDto>> GetLoginByEmail(string email, string password);
+        Task<Result<LoginDto>> GetLoginByNationalId(string nationalId, string password);
 
         Task<LoginDto> GetLoginById(int id);
     }
@@ -26,17 +22,15 @@ namespace HealthInsuranceSystem.Core.Security
     {
         public int Id { get; set; }
 
-        public string Email { get; set; }
+        public string NationalId { get; set; }
 
-        public string Name { get; set; }
+        public string FirstName { get; set; }
 
-        public string Surname { get; set; }
+        public string LastName { get; set; }
 
         public string Username { get; set; }
 
         public int RoleId { get; set; }
-
-        public bool HasWebPortalAccess { get; set; }
     }
 
     public class LoginService : ILoginService
@@ -53,89 +47,38 @@ namespace HealthInsuranceSystem.Core.Security
             _automapperConfiguration = automapperConfiguration;
         }
 
-        public async Task<bool> LoginByEmailCheck(string name)
+        public async Task<Result<LoginDto>> GetLoginByNationalId(string nationalId, string password)
         {
-            return await _context
-                .Set<User>().AnyAsync(x => x.IsActive && x.Name == name);
-        }
-
-        public async Task<LoginDto> GetLoginByEmail(string name)
-        {
-            return await _context
-                .Set<User>()
-                .Where(x => x.IsActive && x.Name == name)
-                .ProjectTo<LoginDto>(_automapperConfiguration, x => x)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<Result<LoginDto>> GetLoginByEmail(string name, string password)
-        {
-            if (name.Contains('|'))
-            {
-                if (name.Split("|")[1] == "SkipValidationFeels")
-                {
-                    name = name.Split("|")[0];
-                }
-            }
 
             var user = await _context
                                   .Set<User>()
-                                  .Where(x => x.Name == name)
+                                  .Where(x => x.NationalID.ToLower() == nationalId.ToLower())
                                   .FirstOrDefaultAsync()
                                   .ConfigureAwait(false);
 
             if (user == null)
-                return Result.Failure<LoginDto>($"Email is not associated with a feels user.");
+                return Result.Failure<LoginDto>($"National Id is not associated with a user.");
 
-            var derivedpassword = _passwordService.CreateHash($"{AccessConstants.Messages.AuthGlobalKey}{user.Name}", user.Salt).Replace("+", "").Replace(" ", "");
+            var derivedpassword = _passwordService.CreateHash($"{AccessConstants.Messages.AuthGlobalKey}{user.NationalID}", user.Salt).Replace("+", "").Replace(" ", "");
 
             if (password != derivedpassword)
             {
-                //if (!user.NormalLoginEnabled)
-                //{
-                //    return Result.Failure<LoginDto>($"Password login not enabled. Please reset account to activate this login channel");
-                //}
 
                 if (user.HashPassword != _passwordService.CreateHash(password, user.Salt))
                 {
-                    return Result.Failure<LoginDto>($"No user found with this email and password combination.");
+                    return Result.Failure<LoginDto>($"No user found with this NationalId and password combination.");
                 }
 
-                //if (!user.IsEmailConfirmed)
-                //    return Result.Failure<LoginDto>($"Confirm your email before accessing FEELS.");
             }
             if (!user.IsActive)
-                return Result.Failure<LoginDto>($"Your account has been deactivated.  To discuss reactivation, please email support@feels.com.");
+                return Result.Failure<LoginDto>($"Your account has been deactivated. Contact support for further enquiries");
 
             return user.MapTo<LoginDto>(_automapperConfiguration);
         }
 
-        //public async Task<LoginDto> GetLoginById(int id)
-        //{
-        //    var user = await _context.Users
-        //       .Include(x => x.Role)
-        //       .ThenInclude(x => x.RoleClaims)
-        //       .SingleOrDefaultAsync(x => x.Id == id);
-
-        //    var loginDto = user.MapTo<LoginDto>(_automapperConfiguration);
-        //    //var portalAccessClaimId0 =await  _context.Claim
-        //    //   .Where(x => x.Name == Claims.WebPortal)
-        //    //   .Select<Claim, int?>(x => x.ClaimId)
-        //    //   .SingleOrDefaultAsync();
-        //    var portalAccessClaimId = await _context.Claim
-        //        .Where(x => x.Name == Claims.WebPortal)
-        //        .Select(x => (int?)x.ClaimId)
-        //        .SingleOrDefaultAsync();
-
-        //    var hasWebPortalAccess = !portalAccessClaimId.HasValue || user.Role.RoleClaims.Any(x => x.ClaimId == portalAccessClaimId.Value && x.Active);
-        //    loginDto.HasWebPortalAccess = hasWebPortalAccess;
-        //    return loginDto;
-        //}
         public async Task<LoginDto> GetLoginById(int id)
         {
             var user = await _context.Users
-               // .Include(x => x.Role)
-               // .ThenInclude(x => x.RoleClaims)
                .SingleOrDefaultAsync(x => x.Id == id);
 
             var loginDto = user.MapTo<LoginDto>(_automapperConfiguration);
@@ -148,7 +91,7 @@ namespace HealthInsuranceSystem.Core.Security
             public LoginServiceProfile()
             {
                 CreateMap<User, LoginDto>().ForMember(x => x.Username, options => options
-                    .MapFrom(s => $"{s.Name}.{s.Surname}"));
+                    .MapFrom(s => $"{s.FirstName}.{s.LastName}"));
             }
         }
     }

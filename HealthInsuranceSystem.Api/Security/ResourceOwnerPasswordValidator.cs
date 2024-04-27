@@ -23,22 +23,13 @@ namespace HealthInsuranceSystem.Api.Security
         {
             try
             {
-                //await SlackMonitor.MakeSlackRequest($"Transfer Feels : --{context.UserName},{context.Password}--");
-
-                var promoEmail = _config["CommonSettings:PromoEmail"];
-                if (context.UserName.ToLower() == promoEmail.ToLower())
-                {
-                    context.Result = new GrantValidationResult(TokenRequestErrors.UnauthorizedClient, $"{"Login has been disabled for a promo account"}");
-                    return;
-                }
-
-                var login = await _loginService.GetLoginByEmail(context.UserName, context.Password);
+                var login = await _loginService.GetLoginByNationalId(context.UserName, context.Password);
 
                 Result validateResponse = Result.Combine(login);
 
                 if (validateResponse.IsFailure)
                 {
-                    if (validateResponse.Error.ToLower() == "Confirm your email before accessing FEELS.".ToLower())
+                    if (validateResponse.Error.ToLower() == "Confirm your email before accessing Insurance.".ToLower())
                     {
                         context.Result = new GrantValidationResult(TokenRequestErrors.UnauthorizedClient, $"{validateResponse.Error}");
                     }

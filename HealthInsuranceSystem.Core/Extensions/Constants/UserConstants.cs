@@ -14,6 +14,7 @@
             public const string UserExists = "User with the information exists.";
             public const string PasswordIncorrect = "User password incorrect.";
             public const string UserIDNotGreaterThanZero = "'User Id' must be greater than '0'.";
+            public const string InvalidUserRole = "Role specified for user is not allowed. Policy holder with Role ID 3 is the only allowed role for this scope.";
         }
     }
 }

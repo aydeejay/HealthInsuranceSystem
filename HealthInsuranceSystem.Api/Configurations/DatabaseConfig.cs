@@ -16,11 +16,6 @@ namespace HealthInsuranceSystem.Api.Configurations
                 {
                     sqlOptions.EnableRetryOnFailure();
                 }));
-
-            //services.AddEntityFrameworkNpgsql().AddDbContext<DataContext>(opt =>
-            //    opt.UseNpgsql(config.GetConnectionString("Default"), sql => sql.MigrationsAssembly("HealthInsuranceSystem.Data")));
-            //opt.UseNpgsql(config.GetConnectionString("DataContext"), sql => sql.UseNetTopologySuite()));
-
         }
 
         public static void Configure(IApplicationBuilder app)
@@ -28,7 +23,6 @@ namespace HealthInsuranceSystem.Api.Configurations
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<DataContext>();
-                //var container = serviceScope.ServiceProvider.GetService<Container>();
                 //context.Database.EnsureCreated();
                 context.Database.Migrate();
             }

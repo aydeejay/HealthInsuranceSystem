@@ -10,14 +10,9 @@ namespace HealthInsuranceSystem.Api.Security.Authorization
 
         public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
         {
-            throw new NotImplementedException();
-            //return null;
+            //throw new NotImplementedException();
+            return Task.FromResult<AuthorizationPolicy?>(null);
         }
-
-        //public Task<AuthorizationPolicy> GetFallbackPolicyAsync()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {

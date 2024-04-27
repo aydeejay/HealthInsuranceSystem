@@ -25,27 +25,23 @@ namespace HealthInsuranceSystem.Core.Data
             {
                 entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.Name)
+                entity.Property(e => e.FirstName)
                    .IsRequired()
                    .HasMaxLength(50)
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
 
-                entity.Property(e => e.Surname)
+                entity.Property(e => e.LastName)
                    .IsRequired()
                    .HasMaxLength(50)
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
 
                 entity.Property(e => e.NationalID)
                     .IsRequired()
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("('')");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.PolicyNumber)
+                entity.Property(e => e.UserPolicyNumber)
                    .IsRequired()
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
 
                 entity.Property(e => e.DateOfBirth)
                    .IsRequired();
@@ -60,20 +56,17 @@ namespace HealthInsuranceSystem.Core.Data
                 entity.Property(e => e.Name)
                    .IsRequired()
                    .HasMaxLength(50)
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
 
                 entity.Property(e => e.Description)
                    .IsRequired()
                    .HasMaxLength(200)
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
 
                 entity.Property(e => e.RoleType)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("('')");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.CreatedDate)
                    .IsRequired();
@@ -82,21 +75,20 @@ namespace HealthInsuranceSystem.Core.Data
                    .IsRequired();
             });
 
-            modelBuilder.Entity<Claim>(entity =>
+            modelBuilder.Entity<AuthClaim>(entity =>
             {
                 entity.HasKey(e => e.ClaimId);
 
                 entity.Property(e => e.Name)
                    .IsRequired()
                    .HasMaxLength(50)
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
+
 
                 entity.Property(e => e.Description)
                    .IsRequired()
                    .HasMaxLength(200)
-                   .IsUnicode(false)
-                   .HasDefaultValueSql("('')");
+                   .IsUnicode(false);
 
                 entity.Property(e => e.CreatedDate)
                    .IsRequired();

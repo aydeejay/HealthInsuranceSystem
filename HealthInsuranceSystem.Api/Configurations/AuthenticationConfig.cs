@@ -18,7 +18,7 @@ namespace HealthInsuranceSystem.Api.Configurations
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         RequireSignedTokens = true,
-                        ValidateAudience = true,
+                        ValidateAudience = false,
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
                         ValidateTokenReplay = false

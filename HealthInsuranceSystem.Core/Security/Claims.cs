@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HealthInsuranceSystem.Core.Security
+﻿namespace HealthInsuranceSystem.Core.Security
 {
     public static class Claims
     {
-        public const string CanRequest = "Request Claims";
-        public const string AcceptRequest = "Accept Claims";
-        public const string EditRequest = "Edit Claims";
-        public const string DeclineREquest = "Remove Roles";
-        public const string WebPortal = "Web Portal";
-
+        public const string CanReview = "Can review claims";
+        public const string CanEditClaims = "Can edit claims";
+        public const string CanViewAllClaims = "Can view all claims";
+        public const string CanViewAllUsers = "Can view all users";
     }
 }
