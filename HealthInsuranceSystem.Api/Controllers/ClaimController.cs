@@ -17,14 +17,14 @@ namespace HealthInsuranceSystem.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ClaimsController : BaseApiController
+    public class ClaimController : BaseApiController
     {
         private readonly IClaimService _claimService;
         private readonly IValidator<AddClaimDto> _addClaimDtoMappingConfig;
-        private readonly IValidator<UpdateClaimDto> _updateClaimDtoMappingConfig;
+        private readonly IValidator<ReviewClaimDto> _updateClaimDtoMappingConfig;
 
-        public ClaimsController(IClaimService claimService,
-            IValidator<UpdateClaimDto> updateClaimDtoMappingConfig,
+        public ClaimController(IClaimService claimService,
+            IValidator<ReviewClaimDto> updateClaimDtoMappingConfig,
             IValidator<AddClaimDto> addClaimDtoMappingConfig)
         {
             _claimService = claimService;
@@ -35,7 +35,7 @@ namespace HealthInsuranceSystem.Api.Controllers
         [RequiresClaims(Claims.CanViewAllClaims)]
         [HttpGet("get-all-claims")]
         [Produces(typeof(Envelope<PagedQueryResult<GetClaimDto>>))]
-        public async Task<IActionResult> GetAllUser(
+        public async Task<IActionResult> GetAllClaim(
             [FromQuery] PaginatedQuery query)
         {
             var response = await _claimService.GetAllClaims(query);
@@ -46,7 +46,7 @@ namespace HealthInsuranceSystem.Api.Controllers
         }
 
         [RequiresClaims(Claims.CanEditClaims)]
-        [HttpPost("add-claims")]
+        [HttpPost("add-claim")]
         public async Task<IActionResult> CreateClaim([FromBody] AddClaimDto request)
         {
             var validateModel = await _addClaimDtoMappingConfig.ValidateAsync(request);
@@ -61,16 +61,16 @@ namespace HealthInsuranceSystem.Api.Controllers
             return Ok(response.Value);
         }
 
-        [RequiresClaims(Claims.CanEditClaims)]
-        [HttpPut("update-claims")]
-        public async Task<IActionResult> UpdateClaim([FromBody] UpdateClaimDto request)
+        [RequiresClaims(Claims.CanReview)]
+        [HttpPut("review-claim")]
+        public async Task<IActionResult> ReviewClaim([FromBody] ReviewClaimDto request)
         {
             var validateModel = await _updateClaimDtoMappingConfig.ValidateAsync(request);
             if (!validateModel.IsValid)
             {
                 return Error(validateModel.ToString());
             }
-            var response = await _claimService.UpdateClaim(request);
+            var response = await _claimService.ReviewClaim(request);
             Result res = Result.Combine(response);
             if (res.IsFailure)
                 return Error(res.Error);

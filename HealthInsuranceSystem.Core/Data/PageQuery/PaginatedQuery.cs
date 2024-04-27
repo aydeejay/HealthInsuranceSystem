@@ -2,7 +2,7 @@
 {
     public class PaginatedQuery
     {
-        public PagedQueryRequest PageQuery { get; set; }
+        public PagedQueryRequest PageQuery { get; set; } = new PagedQueryRequest();
 
         public string Search { get; set; } = string.Empty;
 

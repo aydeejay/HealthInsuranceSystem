@@ -91,7 +91,7 @@ namespace HealthInsuranceSystem.Api.Configurations
                     context.Roles.Add(roleModel);
                     context.Roles.Attach(roleModel);
 
-                    Claim claimModel = new Claim { ClaimId = claimId };
+                    Claim claimModel = new Claim { Id = claimId };
                     context.Claims.Add(claimModel);
                     context.Claims.Attach(claimModel);
 

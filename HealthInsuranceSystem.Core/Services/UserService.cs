@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 using CSharpFunctionalExtensions;
 
@@ -37,9 +36,9 @@ namespace HealthInsuranceSystem.Core.Services
             _passwordService = passwordService;
             _configurationProvider = configurationProvider;
         }
-        public async Task<Result<PagedQueryResult<GetUserDto>>> GetAllUser(PaginatedQuery query)
+        public async Task<Result<ResponseModel<PagedQueryResult<GetUserDto>>>> GetAllUser(PaginatedQuery query)
         {
-            var result = new PagedQueryResult<GetUserDto>();
+            var result = new ResponseModel<PagedQueryResult<GetUserDto>>();
 
             var user = await _unitOfWork.UserRepository.GetAll();
             var users = _context.Set<User>()
@@ -63,16 +62,8 @@ namespace HealthInsuranceSystem.Core.Services
                 users = users.Where(x => x.Id == query.PolicyHolderId);
             }
 
-            result.Items = await users
-           .ProjectTo<GetUserDto>(_configurationProvider)
-           .Skip((query.PageQuery.PageNumber - 1) * query.PageQuery.PageSize)
-           .Take(query.PageQuery.PageSize)
-           .ToListAsync();
-
-            result.TotalItemCount = await users.CountAsync();
-            result.PageCount = (result.TotalItemCount + query.PageQuery.PageSize - 1) / query.PageQuery.PageSize;
-            result.PageNumber = query.PageQuery.PageNumber;
-            result.PageSize = query.PageQuery.PageSize;
+            result.Data = await users.
+                ToPagedResult<User, GetUserDto>(query.PageQuery.PageNumber, query.PageQuery.PageSize, _configurationProvider);
 
             return result;
         }

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 using CSharpFunctionalExtensions;
 
@@ -46,27 +45,19 @@ namespace HealthInsuranceSystem.Core.Services
             if (!string.IsNullOrEmpty(search))
             {
                 claims = claims.Where(x =>
-                    x.ClaimId.Equals(search) ||
+                    x.Id.Equals(search) ||
                     x.CreatedDate.Equals(search) ||
                     x.ExpenseAmount.Equals(search) ||
-                    x.PolicyHolderId.Equals(search));
+                    x.PolicyHolderUserId.Equals(search));
             }
 
             if (query.PolicyHolderId != null && query.PolicyHolderId != 0)
             {
-                claims = claims.Where(x => x.PolicyHolderId == query.PolicyHolderId);
+                claims = claims.Where(x => x.PolicyHolderUserId == query.PolicyHolderId);
             }
 
-            result.Data.Items = await claims
-            .ProjectTo<GetClaimDto>(_mapper.ConfigurationProvider)
-                .Skip((query.PageQuery.PageNumber - 1) * query.PageQuery.PageSize)
-                .Take(query.PageQuery.PageSize)
-                .ToListAsync();
-
-            result.Data.TotalItemCount = await claims.CountAsync();
-            result.Data.PageCount = (result.Data.TotalItemCount + query.PageQuery.PageSize - 1) / query.PageQuery.PageSize;
-            result.Data.PageNumber = query.PageQuery.PageNumber;
-            result.Data.PageSize = query.PageQuery.PageSize;
+            result.Data = await claims.
+                ToPagedResult<Claim, GetClaimDto>(query.PageQuery.PageNumber, query.PageQuery.PageSize, _mapper.ConfigurationProvider);
 
             return result;
         }
@@ -75,14 +66,15 @@ namespace HealthInsuranceSystem.Core.Services
         {
             var response = new ResponseModel();
 
-            var user = await _unitOfWork.UserRepository.GetFirstOrDefault(x => (x.NationalID == request.NationalID));
+            var user = await _unitOfWork.UserRepository.GetFirstOrDefault(x => (x.NationalID == request.NationalID && x.UserPolicyNumber == request.PolicyHolderId));
             if (user == null)
-                return Result.Failure<ResponseModel>($"{UserConstants.ErrorMessages.UserNotFoundWithID}");
+                return Result.Failure<ResponseModel>($"{UserConstants.ErrorMessages.UserNotFoundWithIDandPolicyNo}");
 
             var claim = _mapper.Map<Claim>(request);
             claim.CurrentStatus = ClaimStatus.Submitted.ToString();
             claim.CreatedDate = DateTime.Now;
             claim.LastModifiedDate = DateTime.Now;
+            claim.PolicyHolderUserId = user.Id;
             try
             {
                 await _unitOfWork.ClaimRepository.Add(claim);
@@ -106,13 +98,13 @@ namespace HealthInsuranceSystem.Core.Services
             return response;
         }
 
-        public async Task<Result<ResponseModel>> UpdateClaim(UpdateClaimDto request)
+        public async Task<Result<ResponseModel>> ReviewClaim(ReviewClaimDto request)
         {
             var response = new ResponseModel();
             bool IsInvalidRequest = true;
             string errorMessage = "";
 
-            var claim = await _unitOfWork.ClaimRepository.GetFirstOrDefault(x => x.ClaimId == request.ClaimId);
+            var claim = await _unitOfWork.ClaimRepository.GetFirstOrDefault(x => x.Id == request.ClaimId);
 
             if (claim == null)
                 return Result.Failure<ResponseModel>($"{ClaimConstants.ErrorMessages.ClaimsNotFound}");
@@ -121,11 +113,11 @@ namespace HealthInsuranceSystem.Core.Services
 
             var claimsAudit = new ClaimsAudit()
             {
-                PolicyHolderId = claim.PolicyHolderId,
+                PolicyHolderId = claim.PolicyHolderUserId,
                 Comment = request.Comment,
                 OldStatus = claim.CurrentStatus,
                 NewStatus = request.Status.ToString(),
-                AssignedUserId = claim.PolicyHolderId, // Need to get user form authentication
+                AssignedUserId = claim.PolicyHolderUserId, // Need to get user form authentication
                 DateCreated = DateTime.UtcNow,
             };
 
@@ -140,7 +132,7 @@ namespace HealthInsuranceSystem.Core.Services
                     {
                         IsInvalidRequest = false;
                         claim.CurrentStatus = request.Status.ToString();
-                        claimsAudit.AssignedUserId = claim.PolicyHolderId;
+                        claimsAudit.AssignedUserId = claim.PolicyHolderUserId;
                     }
                     else
                     {
@@ -168,7 +160,7 @@ namespace HealthInsuranceSystem.Core.Services
                 case ClaimStatus.Declined:
                     if (claim.CurrentStatus == ClaimStatus.Submitted.ToString())
                     {
-                        errorMessage = "Status needs to be set as In-Review first";
+                        errorMessage = "Status needs to be set as In-Review first - Status Id 3";
                     }
                     else if (claim.CurrentStatus == ClaimStatus.InReview.ToString())
                     {
@@ -199,7 +191,7 @@ namespace HealthInsuranceSystem.Core.Services
             _unitOfWork.ClaimRepository.Update(claim);
 
 
-            response.Message = ClaimConstants.Messages.ClaimsUpdateSuccessful;
+            response.Message = ClaimConstants.Messages.ClaimsStatusUpdateSuccessful;
             response.IsSuccessful = true;
 
             try

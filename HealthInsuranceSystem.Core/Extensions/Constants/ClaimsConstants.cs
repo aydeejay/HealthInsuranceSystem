@@ -6,6 +6,7 @@
         {
             public const string ClaimsCreatedSuccessful = "Claim created Successfully";
             public const string ClaimsUpdateSuccessful = "Claim updated Successfully";
+            public const string ClaimsStatusUpdateSuccessful = "Claim status updated Successfully";
 
         }
         public static class ErrorMessages

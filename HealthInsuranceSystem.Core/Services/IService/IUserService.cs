@@ -10,6 +10,6 @@ namespace HealthInsuranceSystem.Core.Services.IService
     {
         Task<Result<ResponseModel>> CreateUser(AddUserDto request);
         Task<Result<ResponseModel<GetUserDto>>> GetUserByPolicyNumber(string policyNumber);
-        Task<Result<PagedQueryResult<GetUserDto>>> GetAllUser(PaginatedQuery query);
+        Task<Result<ResponseModel<PagedQueryResult<GetUserDto>>>> GetAllUser(PaginatedQuery query);
     }
 }

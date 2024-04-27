@@ -10,7 +10,8 @@
         }
         public static class ErrorMessages
         {
-            public const string UserNotFoundWithID = "The provided ID for user logged in is invalid.";
+            public const string UserNotFoundWithID = "The provided ID is not attached to a user.";
+            public const string UserNotFoundWithIDandPolicyNo = "The provided ID and Policy number combination is invalid.";
             public const string UserExists = "User with the information exists.";
             public const string PasswordIncorrect = "User password incorrect.";
             public const string UserIDNotGreaterThanZero = "'User Id' must be greater than '0'.";

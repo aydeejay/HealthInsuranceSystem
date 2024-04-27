@@ -26,7 +26,7 @@ namespace HealthInsuranceSystem.Api.Configurations
 
             services.AddScoped<IValidator<AddClaimDto>, AddClaimDtoValidator>();
             services.AddScoped<IValidator<AddUserDto>, AddUserDtoValidator>();
-            services.AddScoped<IValidator<UpdateClaimDto>, UpdateClaimDtoValidator>();
+            services.AddScoped<IValidator<ReviewClaimDto>, ReviewClaimDtoValidator>();
         }
     }
 }

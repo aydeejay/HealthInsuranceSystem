@@ -12,8 +12,10 @@ namespace HealthInsuranceSystem.Core.Models.Mappings
         public MappingConfig()
         {
             CreateMap<AddClaimDto, Claim>().ReverseMap();
+            CreateMap<ReviewClaimDto, Claim>().ReverseMap();
+            CreateMap<GetClaimDto, Claim>().ReverseMap();
+
             CreateMap<AddUserDto, User>().ReverseMap();
-            CreateMap<UpdateClaimDto, Claim>().ReverseMap();
             CreateMap<GetUserDto, User>().ReverseMap();
 
             CreateMap<User, IdentityUser>();
