@@ -1,5 +1,4 @@
-# HealthInsuranceSystem.Core.Services - User Service
-
+# HealthInsuranceSystem Services
 ## Overview
 The `UserService` is a part of the `HealthInsuranceSystem.Core.Services` project and provides methods to interact with the `User` entity in the application. The `UserService` is responsible for performing CRUD operations on the `User` entity, such as retrieving all users, retrieving a user by policy number, and creating a new user.
 
