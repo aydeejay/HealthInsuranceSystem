@@ -2,9 +2,11 @@
 
 using FluentValidation;
 
+using HealthInsuranceSystem.Api.Security.Authorization;
 using HealthInsuranceSystem.Core.Data.PageQuery;
 using HealthInsuranceSystem.Core.Extensions;
 using HealthInsuranceSystem.Core.Models.DTO.UserDto;
+using HealthInsuranceSystem.Core.Security;
 using HealthInsuranceSystem.Core.Services.IService;
 
 using Microsoft.AspNetCore.Authorization;
@@ -25,9 +27,13 @@ namespace HealthInsuranceSystem.Api.Controllers
             _userService = userService;
             _addUserDtoMappingConfig = addUserDtoMappingConfig;
         }
-        [AllowAnonymous]
+
+
+        [RequiresClaims(Claims.CanViewAllUsers)]
         [HttpGet("getAllUser")]
-        //[Produces(typeof(Envelope<PagedQueryResult<GetUserDto>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Envelope))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllUser([FromQuery] PaginatedQuery query)
         {
             var response = await _userService.GetAllUser(query);
@@ -36,9 +42,12 @@ namespace HealthInsuranceSystem.Api.Controllers
                 return Error(res.Error);
             return Ok(response.Value);
         }
-        //[RequiresClaims(Claims.CanRequest)]
+
+        [AllowAnonymous]
         [HttpPost("addUser")]
-        [Produces(typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Envelope))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateUser([FromBody] AddUserDto request)
         {
             var validateModel = await _addUserDtoMappingConfig.ValidateAsync(request);
@@ -52,9 +61,11 @@ namespace HealthInsuranceSystem.Api.Controllers
                 return Error(res.Error);
             return Ok(response.Value);
         }
-        //[RequiresClaims(Claims.AcceptRequest)]
+
         [HttpGet("getUserByPolicyNumber")]
-        [Produces(typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Envelope))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(string policyNumber)
         {
 

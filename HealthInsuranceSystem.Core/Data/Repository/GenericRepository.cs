@@ -75,6 +75,18 @@ namespace HealthInsuranceSystem.Core.Data.Repository
             return await query.FirstOrDefaultAsync();
         }
 
+        public IQueryable<T> GetQueryable(Expression<Func<T, bool>> filter = null)
+        {
+            IQueryable<T> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return query;
+        }
+
         public void Remove(int id)
         {
             T entity = dbSet.Find(id);

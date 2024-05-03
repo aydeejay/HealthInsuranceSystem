@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace HealthInsuranceSystem.Core.Data.Repository.IRepository
 {
@@ -18,6 +13,8 @@ namespace HealthInsuranceSystem.Core.Data.Repository.IRepository
         Task<T> GetFirstOrDefault(
             Expression<Func<T, bool>> filter = null,
             string includeProperties = null);
+
+        IQueryable<T> GetQueryable(Expression<Func<T, bool>> filter = null);
 
         Task<T> Add(T entity);
 

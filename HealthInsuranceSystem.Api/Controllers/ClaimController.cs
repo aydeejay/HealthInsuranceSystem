@@ -34,6 +34,9 @@ namespace HealthInsuranceSystem.Api.Controllers
 
         [RequiresClaims(Claims.CanViewAllClaims)]
         [HttpGet("get-all-claims")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Envelope<PagedQueryResult<GetClaimDto>>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Envelope))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Produces(typeof(Envelope<PagedQueryResult<GetClaimDto>>))]
         public async Task<IActionResult> GetAllClaim(
             [FromQuery] PaginatedQuery query)
@@ -47,6 +50,9 @@ namespace HealthInsuranceSystem.Api.Controllers
 
         [RequiresClaims(Claims.CanEditClaims)]
         [HttpPost("add-claim")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Envelope))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateClaim([FromBody] AddClaimDto request)
         {
             var validateModel = await _addClaimDtoMappingConfig.ValidateAsync(request);
@@ -63,6 +69,9 @@ namespace HealthInsuranceSystem.Api.Controllers
 
         [RequiresClaims(Claims.CanReview)]
         [HttpPut("review-claim")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Envelope<ResponseModel>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Envelope))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ReviewClaim([FromBody] ReviewClaimDto request)
         {
             var validateModel = await _updateClaimDtoMappingConfig.ValidateAsync(request);

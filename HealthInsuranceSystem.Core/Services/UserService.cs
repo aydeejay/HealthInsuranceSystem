@@ -2,18 +2,14 @@
 
 using CSharpFunctionalExtensions;
 
-using HealthInsuranceSystem.Core.Data;
 using HealthInsuranceSystem.Core.Data.PageQuery;
 using HealthInsuranceSystem.Core.Data.Repository.IRepository;
 using HealthInsuranceSystem.Core.Extensions;
 using HealthInsuranceSystem.Core.Extensions.Constants;
 using HealthInsuranceSystem.Core.Models.Domain;
-using HealthInsuranceSystem.Core.Models.Domain.Authorization;
 using HealthInsuranceSystem.Core.Models.DTO.UserDto;
 using HealthInsuranceSystem.Core.Security;
 using HealthInsuranceSystem.Core.Services.IService;
-
-using Microsoft.EntityFrameworkCore;
 
 using System.Security.Cryptography;
 
@@ -24,15 +20,13 @@ namespace HealthInsuranceSystem.Core.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly DataContext _context;
         private readonly IPasswordService _passwordService;
         private readonly IConfigurationProvider _configurationProvider;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, DataContext context, IPasswordService passwordService, IConfigurationProvider configurationProvider)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IPasswordService passwordService, IConfigurationProvider configurationProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _context = context;
             _passwordService = passwordService;
             _configurationProvider = configurationProvider;
         }
@@ -40,17 +34,13 @@ namespace HealthInsuranceSystem.Core.Services
         {
             var result = new ResponseModel<PagedQueryResult<GetUserDto>>();
 
-            var user = await _unitOfWork.UserRepository.GetAll();
-            var users = _context.Set<User>()
-            .AsNoTracking()
-            .Include(x => x.Role)
-            .AsQueryable();
+            var userQueryable = _unitOfWork.UserRepository.GetQueryable();
 
             var search = query.Search?.ToLower();
 
             if (!string.IsNullOrEmpty(search))
             {
-                users = users.Where(x =>
+                userQueryable = userQueryable.Where(x =>
                     x.FirstName.Contains(search) ||
                     x.LastName.Contains(search) ||
                     x.NationalID.Contains(search) ||
@@ -59,10 +49,10 @@ namespace HealthInsuranceSystem.Core.Services
 
             if (query.PolicyHolderId != null && query.PolicyHolderId != 0)
             {
-                users = users.Where(x => x.Id == query.PolicyHolderId);
+                userQueryable = userQueryable.Where(x => x.Id == query.PolicyHolderId);
             }
 
-            result.Data = await users.
+            result.Data = await userQueryable.
                 ToPagedResult<User, GetUserDto>(query.PageQuery.PageNumber, query.PageQuery.PageSize, _configurationProvider);
 
             return result;
@@ -102,13 +92,9 @@ namespace HealthInsuranceSystem.Core.Services
             {
                 return Result.Failure<ResponseModel>(UserConstants.ErrorMessages.InvalidUserRole);
             }
-
             var response = new ResponseModel();
 
-            var user = await _context.Set<User>()
-               .AsNoTracking()
-               .Where(x => x.NationalID.ToLower() == request.NationalID.ToLower())
-               .FirstOrDefaultAsync();
+            var user = await _unitOfWork.UserRepository.GetFirstOrDefault(x => x.NationalID.ToLower() == request.NationalID.ToLower());
 
             if (user != null)
             {
@@ -116,11 +102,8 @@ namespace HealthInsuranceSystem.Core.Services
             }
 
             user = _mapper.Map<User>(request);
-            var role = await _context.Set<Role>()
-               .AsNoTracking()
-               .Where(x => x.Name == request.RoleType.ToString())
-               .FirstOrDefaultAsync();
 
+            var role = await _unitOfWork.RoleRepository.GetFirstOrDefault(x => x.Name == request.RoleType.ToString());
 
             user.RoleId = role.RoleId;
 
@@ -154,6 +137,11 @@ namespace HealthInsuranceSystem.Core.Services
                 rng.GetBytes(tokenBuffer);
                 return Convert.ToBase64String(tokenBuffer);
             }
+        }
+
+        public static string GeneratePolicyHolderIdTest()
+        {
+            return GeneratePolicyHolderId();
         }
     }
 }

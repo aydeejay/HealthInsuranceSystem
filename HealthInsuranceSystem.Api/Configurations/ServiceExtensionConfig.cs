@@ -19,6 +19,7 @@ namespace HealthInsuranceSystem.Api.Configurations
             services.AddScoped(typeof(GenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IClaimsAuditRepository, ClaimsAuditRepository>();
             services.AddScoped<IClaimRepository, ClaimRepository>();
             services.AddScoped<IUserService, UserService>();

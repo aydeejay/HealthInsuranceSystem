@@ -5,6 +5,7 @@
         IClaimsAuditRepository ClaimsAuditRepository { get; }
         IClaimRepository ClaimRepository { get; }
         IUserRepository UserRepository { get; }
+        IRoleRepository RoleRepository { get; }
         Task SaveAsync();
     }
 }

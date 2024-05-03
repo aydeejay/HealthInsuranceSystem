@@ -2,7 +2,6 @@
 
 using CSharpFunctionalExtensions;
 
-using HealthInsuranceSystem.Core.Data;
 using HealthInsuranceSystem.Core.Data.PageQuery;
 using HealthInsuranceSystem.Core.Data.Repository.IRepository;
 using HealthInsuranceSystem.Core.Extensions;
@@ -20,21 +19,20 @@ namespace HealthInsuranceSystem.Core.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly DataContext _context;
         private readonly IConfigurationProvider _configurationProvider;
 
-        public ClaimService(IUnitOfWork unitOfWork, IMapper mapper, DataContext context, IConfigurationProvider configurationProvider)
+        public ClaimService(IUnitOfWork unitOfWork, IMapper mapper, IConfigurationProvider configurationProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _context = context;
             _configurationProvider = configurationProvider;
         }
         public async Task<Result<ResponseModel<PagedQueryResult<GetClaimDto>>>> GetAllClaims(PaginatedQuery query)
         {
             var result = new ResponseModel<PagedQueryResult<GetClaimDto>>();
 
-            var claims = _context.Set<Claim>()
+            var claimQueryable = _unitOfWork.ClaimRepository.GetQueryable();
+            var claims = claimQueryable
                 .AsNoTracking()
                 .Include(x => x.AssignedUser)
                 .Include(x => x.PolicyHolder)
